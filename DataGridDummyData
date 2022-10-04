@@ -1,0 +1,261 @@
+import React, { useState, Fragment } from 'react';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { makeStyles } from '@mui/styles';
+import { Button, TableContainer, Grid, IconButton, Box, Paper, Typography, Stack, TextField } from '@mui/material';
+import * as yup from 'yup';
+import SearchIcon from '@mui/icons-material/Search';
+import { yupResolver } from '@hookform/resolvers/yup';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import FormControl from '@mui/material/FormControl';
+import { DataGrid } from '@mui/x-data-grid';
+import EditIcon from '@mui/icons-material/Edit';
+import Select from '@mui/material/Select';
+import { Container } from '@mui/system';
+import { FormProvider, RHFTextField, RHFAutocomplete, RHFSelect } from '../../../components/hook-form';
+
+const useStyles = makeStyles((theme) => ({
+  headerSection: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    width: '100%',
+    alignItems: 'center',
+  },
+  createMatches: {
+    display: 'flex',
+  },
+  leftSideSection: {
+    width: '50%',
+  },
+  rightSideSection: {
+    width: '50%',
+    display: 'flex',
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+  },
+  selectTournament: {
+    width: '50%',
+  },
+  createTournament: {
+    display: 'flex',
+  },
+
+  tableDataGrid: {
+    height: 600,
+  },
+  tableContainer: {
+    height: 700,
+    width: '100%',
+    border: '1px solid white',
+    boxShadow: '1px 1px 5px black',
+    overflowY: 'hidden',
+    padding: '10px 20px',
+  },
+  tableSpqHeading: {
+    fontSize: '13px',
+    textAlign: 'center',
+    marginTop: '2px',
+  },
+  headerMainGrid: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+}));
+
+const tourment = ['IPL', 'T20', 'ONE DAY'];
+
+export default function ChangeOrderDetails() {
+  const navigate = useNavigate();
+  const classes = useStyles();
+  const [dropDown, setDropDown] = useState(false);
+
+  const handleTournment = () => {
+    setDropDown(true);
+  };
+
+  return (
+    <>
+      <Grid className={classes.headerSection}>
+        <Typography variant="div" className={classes.leftSideSection}>
+          <Typography className={classes.selectTournament}>
+            <Typography>Select Tournament</Typography>
+            <Select name="country" style={{ width: '100%' }}>
+              {tourment?.map((item, index) => (
+                <MenuItem key={index} value={item} onClick={handleTournment}>
+                  {item}
+                </MenuItem>
+              ))}
+            </Select>
+          </Typography>
+        </Typography>
+        <Typography variant="div" className={classes.rightSideSection}>
+          <Typography className={classes.createTournament}>
+            <Typography>
+              <Button variant="contained" style={{ width: 'auto' }}>
+                Create Matches
+              </Button>
+            </Typography>
+            <Typography style={{ margin: '10px' }} />
+            <Typography>
+              <Button variant="contained" style={{ width: 'auto' }}>
+                Import CSV file
+              </Button>
+            </Typography>
+          </Typography>
+        </Typography>
+      </Grid>
+      <div>{dropDown && renderContent(false)}</div>
+    </>
+  );
+}
+
+const renderContent = () => {
+  function NoRowsOverlay() {
+    return (
+      <Stack height="100%" alignItems="center" mt={3}>
+        <SearchIcon />
+        <Typography>No data found</Typography>
+      </Stack>
+    );
+  }
+
+  const columns = [
+    { field: 'matchId', headerName: 'Match ID', headerAlign: 'center', align: 'center' },
+    { field: 'teamA', headerName: 'Team A', headerAlign: 'center', align: 'center' },
+    {
+      field: 'teamB',
+      headerName: 'Team B',
+      headerAlign: 'center',
+      align: 'center',
+    },
+    {
+      field: 'matchDate',
+      headerName: 'Match Date',
+      headerAlign: 'center',
+      align: 'center',
+      editable: true,
+    },
+
+    {
+      field: 'time',
+      headerName: 'Time',
+      editable: true,
+      headerAlign: 'center',
+      align: 'center',
+      width: 200,
+    },
+    {
+      field: 'venue',
+      headerName: 'Venue',
+      editable: true,
+      headerAlign: 'center',
+      align: 'center',
+      width: 110,
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      headerAlign: 'center',
+      align: 'center',
+      width: 120,
+    },
+    {
+      field: 'action',
+      headerName: 'Actions',
+      headerAlign: 'center',
+      align: 'center',
+      width: 250,
+      renderCell: (props) => {
+        if (props.row.status === 'Scheduled') {
+          return (
+            <>
+              <Grid style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
+                <Grid>
+                  <IconButton>
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton>
+                    <DeleteOutlineIcon style={{ color: 'red' }} />
+                  </IconButton>
+                </Grid>
+                <Grid>
+                  <Button variant="contained" style={{ width: 'auto' }}>
+                    Mark as Complete
+                  </Button>
+                </Grid>
+              </Grid>
+            </>
+          );
+        }
+      },
+    },
+  ];
+  const rows = [
+    {
+      id: 1,
+      matchId: 'MC001',
+      teamA: 'RCB',
+      teamB: 'CSK',
+      matchDate: '01-sep-2021',
+      time: '19:30 IST (GMT+5.5)',
+      venue: 'LB STADIUM',
+      status: 'Scheduled',
+    },
+    {
+      id: 2,
+      matchId: 'MC002',
+      teamA: 'RCB',
+      teamB: 'CSK',
+      matchDate: '01-sep-2021',
+      time: '19:30 IST (GMT+5.5)',
+      venue: 'LB STADIUM',
+      status: 'Scheduled',
+    },
+    {
+      id: 3,
+      matchId: 'MC002',
+      teamA: 'RCB',
+      teamB: 'CSK',
+      matchDate: '01-sep-2021',
+      time: '19:30 IST (GMT+5.5)',
+      venue: 'LB STADIUM',
+      status: 'Abandoned',
+    },
+    {
+      id: 4,
+      matchId: 'MC002',
+      teamA: 'RCB',
+      teamB: 'CSK',
+      matchDate: '01-sep-2021',
+      time: '19:30 IST (GMT+5.5)',
+      venue: 'LB STADIUM',
+      status: 'Completed',
+    },
+  ];
+  return (
+    <>
+      <Grid style={{ marginTop: '10%' }}>
+        <div style={{ height: 400, width: '100%' }}>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            experimentalFeatures={{ newEditingApi: true }}
+            sx={{
+              '.MuiDataGrid-columnSeparator': {
+                display: 'none',
+              },
+              '&.MuiDataGrid-root': {
+                border: 'none',
+              },
+            }}
+            components={{ NoRowsOverlay }}
+          />
+        </div>
+      </Grid>
+    </>
+  );
+};
